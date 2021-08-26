@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_maps/constnats/my_colors.dart';
+import 'package:flutter_maps/constnats/strings.dart';
 
 // ignore: must_be_immutable
 class LoginScreen extends StatelessWidget {
   LoginScreen({Key? key}) : super(key: key);
 
+  final GlobalKey<FormState> _phoneFormKey = GlobalKey();
+
   late String phoneNumber;
 
   Widget _buildIntroTexts() {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'What is your phone number?',
@@ -97,11 +101,13 @@ class LoginScreen extends StatelessWidget {
     return flag;
   }
 
-  Widget _buildNextButton() {
+  Widget _buildNextButton(BuildContext context) {
     return Align(
       alignment: Alignment.centerRight,
       child: ElevatedButton(
-        onPressed: () {},
+        onPressed: () {
+          Navigator.pushNamed(context, otpScreen);
+        },
         child: Text(
           'Next',
           style: TextStyle(color: Colors.white, fontSize: 16),
@@ -123,7 +129,7 @@ class LoginScreen extends StatelessWidget {
       child: Scaffold(
         backgroundColor: Colors.white,
         body: Form(
-          key: UniqueKey(),
+          key: _phoneFormKey,
           child: Container(
             margin: EdgeInsets.symmetric(horizontal: 32, vertical: 88),
             child: Column(
@@ -137,7 +143,7 @@ class LoginScreen extends StatelessWidget {
                 SizedBox(
                   height: 70,
                 ),
-                _buildNextButton(),
+                _buildNextButton(context),
               ],
             ),
           ),

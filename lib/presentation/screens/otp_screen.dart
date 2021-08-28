@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_maps/business_logic/cubit/phone_auth/phone_auth_cubit.dart';
 import 'package:flutter_maps/constnats/my_colors.dart';
+import 'package:flutter_maps/constnats/strings.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 
+// ignore: must_be_immutable
 class OtpScreen extends StatelessWidget {
-  OtpScreen({Key? key}) : super(key: key);
+  final phoneNumber;
 
-  final phoneNumber = '';
+  OtpScreen({Key? key, required this.phoneNumber}) : super(key: key);
+
+  late String otpCode;
 
   Widget _buildIntroTexts() {
     return Column(
@@ -38,6 +44,27 @@ class OtpScreen extends StatelessWidget {
     );
   }
 
+  void showProgressIndicator(BuildContext context) {
+    AlertDialog alertDialog = AlertDialog(
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      content: Center(
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
+        ),
+      ),
+    );
+
+    showDialog(
+      barrierColor: Colors.white.withOpacity(0),
+      barrierDismissible: false,
+      context: context,
+      builder: (context) {
+        return alertDialog;
+      },
+    );
+  }
+
   Widget _buildPinCodeFields(BuildContext context) {
     return Container(
       child: PinCodeTextField(
@@ -64,8 +91,8 @@ class OtpScreen extends StatelessWidget {
         animationDuration: Duration(milliseconds: 300),
         backgroundColor: Colors.white,
         enableActiveFill: true,
-        onCompleted: (code) {
-          //otpCode = code;
+        onCompleted: (submitedCode) {
+          otpCode = submitedCode;
           print("Completed");
         },
         onChanged: (value) {
@@ -75,11 +102,19 @@ class OtpScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildVrifyButton() {
+  void _login(BuildContext context) {
+    BlocProvider.of<PhoneAuthCubit>(context).submitOTP(otpCode);
+  }
+
+  Widget _buildVrifyButton(BuildContext context) {
     return Align(
       alignment: Alignment.centerRight,
       child: ElevatedButton(
-        onPressed: () {},
+        onPressed: () {
+          showProgressIndicator(context);
+
+          _login(context);
+        },
         child: Text(
           'Verify',
           style: TextStyle(color: Colors.white, fontSize: 16),
@@ -92,6 +127,37 @@ class OtpScreen extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildPhoneVerificationBloc() {
+    return BlocListener<PhoneAuthCubit, PhoneAuthState>(
+      listenWhen: (previous, current) {
+        return previous != current;
+      },
+      listener: (context, state) {
+        if (state is Loading) {
+          showProgressIndicator(context);
+        }
+
+        if (state is PhoneOTPVerified) {
+          Navigator.pop(context);
+          Navigator.of(context).pushReplacementNamed(mapScreen);
+        }
+
+        if (state is ErrorOccurred) {
+          //Navigator.pop(context);
+          String errorMsg = (state).errorMsg;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(errorMsg),
+              backgroundColor: Colors.black,
+              duration: Duration(seconds: 3),
+            ),
+          );
+        }
+      },
+      child: Container(),
     );
   }
 
@@ -112,7 +178,8 @@ class OtpScreen extends StatelessWidget {
               SizedBox(
                 height: 60,
               ),
-              _buildVrifyButton(),
+              _buildVrifyButton(context),
+              _buildPhoneVerificationBloc(),
             ],
           ),
         ),

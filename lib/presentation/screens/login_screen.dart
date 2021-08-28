@@ -1,4 +1,7 @@
+
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_maps/business_logic/cubit/phone_auth/phone_auth_cubit.dart';
 import 'package:flutter_maps/constnats/my_colors.dart';
 import 'package:flutter_maps/constnats/strings.dart';
 
@@ -93,7 +96,7 @@ class LoginScreen extends StatelessWidget {
   }
 
   String generateCountryFlag() {
-    String countryCode = 'sl';
+    String countryCode = 'eg';
 
     String flag = countryCode.toUpperCase().replaceAllMapped(RegExp(r'[A-Z]'),
         (match) => String.fromCharCode(match.group(0)!.codeUnitAt(0) + 127397));
@@ -101,12 +104,25 @@ class LoginScreen extends StatelessWidget {
     return flag;
   }
 
+  Future<void> _register(BuildContext context) async {
+    if (!_phoneFormKey.currentState!.validate()) {
+      Navigator.pop(context);
+      return;
+    } else {
+      Navigator.pop(context);
+      _phoneFormKey.currentState!.save();
+      BlocProvider.of<PhoneAuthCubit>(context).submitPhoneNumber(phoneNumber);
+    }
+  }
+
   Widget _buildNextButton(BuildContext context) {
     return Align(
       alignment: Alignment.centerRight,
       child: ElevatedButton(
         onPressed: () {
-          Navigator.pushNamed(context, otpScreen);
+          showProgressIndicator(context);
+
+          _register(context);
         },
         child: Text(
           'Next',
@@ -120,6 +136,58 @@ class LoginScreen extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  void showProgressIndicator(BuildContext context) {
+    AlertDialog alertDialog = AlertDialog(
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      content: Center(
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
+        ),
+      ),
+    );
+
+    showDialog(
+      barrierColor: Colors.white.withOpacity(0),
+      barrierDismissible: false,
+      context: context,
+      builder: (context) {
+        return alertDialog;
+      },
+    );
+  }
+
+  Widget _buildPhoneNumberSubmitedBloc() {
+    return BlocListener<PhoneAuthCubit, PhoneAuthState>(
+      listenWhen: (previous, current) {
+        return previous != current;
+      },
+      listener: (context, state) {
+        if (state is Loading) {
+          showProgressIndicator(context);
+        }
+
+        if (state is PhoneNumberSubmited) {
+          Navigator.pop(context);
+          Navigator.of(context).pushNamed(otpScreen, arguments: phoneNumber);
+        }
+
+        if (state is ErrorOccurred) {
+          Navigator.pop(context);
+          String errorMsg = (state).errorMsg;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(errorMsg),
+              backgroundColor: Colors.black,
+              duration: Duration(seconds: 3),
+            ),
+          );
+        }
+      },
+      child: Container(),
     );
   }
 
@@ -144,6 +212,7 @@ class LoginScreen extends StatelessWidget {
                   height: 70,
                 ),
                 _buildNextButton(context),
+                _buildPhoneNumberSubmitedBloc(),
               ],
             ),
           ),

@@ -27,6 +27,8 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_bloc: ^7.2.0
+  geolocator: ^7.6.2
+  google_maps_flutter: ^2.0.9
   pin_code_fields: ^7.3.0
 
 dev_dependencies:

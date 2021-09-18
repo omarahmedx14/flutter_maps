@@ -1,10 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_maps/business_logic/cubit/phone_auth/phone_auth_cubit.dart';
 import 'package:flutter_maps/constnats/my_colors.dart';
-import 'package:flutter_maps/constnats/strings.dart';
 import 'package:flutter_maps/helpers/location_helper.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';

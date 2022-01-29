@@ -33,10 +33,12 @@ class MyDrawer extends StatelessWidget {
         const SizedBox(
           height: 5,
         ),
-        Text(
-          '01146401103',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        )
+        BlocProvider<PhoneAuthCubit>(
+            create: (context) => phoneAuthCubit,
+            child: Text(
+              '${phoneAuthCubit.getLoggedInUser().phoneNumber}',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            )),
       ],
     );
   }

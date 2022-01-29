@@ -33,6 +33,10 @@ dependencies:
   material_floating_search_bar: ^0.3.4
   pin_code_fields: ^7.3.0
   url_launcher: ^6.0.10
+  dio: ^4.0.4
+  uuid: ^3.0.5
+  flutter_polyline_points: ^1.0.0
+
 
 dev_dependencies:
   flutter_test:
